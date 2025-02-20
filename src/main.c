@@ -35,6 +35,11 @@ static const struct gpio_dt_spec gnd = GPIO_DT_SPEC_GET(ZEPHYR_USER_NODE, gnd_gp
 #else
 #warning "IMU power pins not defined: do not stack IMU on SUPERMINI"
 #endif
+#if DT_NODE_HAS_PROP(ZEPHYR_USER_NODE, button_gnd_gpios)
+static const struct gpio_dt_spec button_gnd = GPIO_DT_SPEC_GET(ZEPHYR_USER_NODE, button_gnd_gpios);
+#else
+#warning "Button GND pin not defined: button will not work"
+#endif
 #define DFU_DBL_RESET_MEM 0x20007F7C
 #define DFU_DBL_RESET_APP 0x4ee5677e
 
@@ -55,6 +60,10 @@ int main(void) {
     gpio_pin_set_dt(&gnd, 0);
     gpio_pin_configure_dt(&pwr, GPIO_OUTPUT_ACTIVE);
     gpio_pin_set_dt(&pwr, 1);
+#endif 
+#if DT_NODE_HAS_PROP(ZEPHYR_USER_NODE, button_gnd_gpios)
+    gpio_pin_configure_dt(&button_gnd, GPIO_OUTPUT_INACTIVE);
+    gpio_pin_set_dt(&button_gnd, 0);
 #endif 
 #if IGNORE_RESET && BUTTON_EXISTS
 	bool reset_pin_reset = false;
