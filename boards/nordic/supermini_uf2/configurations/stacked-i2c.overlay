@@ -1,0 +1,22 @@
+// Using i2c to communicate with the IMU (i2c is slower than SPI, but uses fewer pins)
+// I2C  is configured to be adjacent to the SDA and SCL pins on the imu
+
+
+&i2c0_default {
+    group1 {
+        psels = <NRF_PSEL(TWIM_SDA, 0, 24)>, <NRF_PSEL(TWIM_SCL, 0, 22)>;
+    };
+};
+
+&i2c0_sleep {
+    group1 {
+        psels = <NRF_PSEL(TWIM_SDA, 0, 24)>, <NRF_PSEL(TWIM_SCL, 0, 22)>;
+    };
+};
+
+
+// Disable SPI by default (Default pins conflict with i2c, so need to disable when using i2c)
+/delete-node/ &imu_spi;
+
+
+
