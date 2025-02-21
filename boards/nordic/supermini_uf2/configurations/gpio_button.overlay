@@ -1,0 +1,7 @@
+// Enable using pin 31 as GND for a button connected to RST
+
+/ {
+	zephyr,user {
+        button-gnd-gpios = <&gpio0 31 GPIO_OUTPUT_INACTIVE>;
+	};
+};
