@@ -74,6 +74,15 @@ static const struct pwm_dt_spec clk_out = PWM_DT_SPEC_GET(CLKOUT_NODE);
 static const struct pwm_dt_spec clk_out = {0};
 #endif
 
+// Stacked configuration GPIO power
+#if DT_NODE_HAS_PROP(ZEPHYR_USER_NODE, pwr_gpios)
+#define IS_STACKED true
+	static const struct gpio_dt_spec pwr = GPIO_DT_SPEC_GET(ZEPHYR_USER_NODE, pwr_gpios);
+	static const struct gpio_dt_spec gnd = GPIO_DT_SPEC_GET(ZEPHYR_USER_NODE, gnd_gpios);
+#else
+	#warning "IMU power pins not defined: do not stack IMU on SUPERMINI"
+#endif
+
 #define DFU_EXISTS CONFIG_BUILD_OUTPUT_UF2 || CONFIG_BOARD_HAS_NRF5_BOOTLOADER
 #define ADAFRUIT_BOOTLOADER CONFIG_BUILD_OUTPUT_UF2
 #define NRF5_BOOTLOADER CONFIG_BOARD_HAS_NRF5_BOOTLOADER
@@ -349,6 +358,10 @@ static int sys_gpio_init(void) {
 #endif
 #if LDO_EN_EXISTS
 	gpio_pin_configure_dt(&ldo_en, GPIO_OUTPUT);
+#if IS_STACKED
+    gpio_pin_configure_dt(&gnd, GPIO_OUTPUT_INACTIVE);
+    gpio_pin_configure_dt(&pwr, GPIO_OUTPUT_ACTIVE);
+#endif 
 #endif
 	return 0;
 }
