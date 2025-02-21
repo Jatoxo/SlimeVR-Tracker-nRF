@@ -83,6 +83,12 @@ static const struct pwm_dt_spec clk_out = {0};
 	#pragma message "Not using stacked configuration: Apply the device tree overlay for stacked configuration"
 #endif
 
+// Allows placing a normal RST pin button between RST and GPIO 31
+#if DT_NODE_HAS_PROP(ZEPHYR_USER_NODE, button_gnd_gpios)
+#define EXTRA_BTN_GND true
+	static const struct gpio_dt_spec button_gnd = GPIO_DT_SPEC_GET(ZEPHYR_USER_NODE, button_gnd_gpios);
+#endif
+
 #define DFU_EXISTS CONFIG_BUILD_OUTPUT_UF2 || CONFIG_BOARD_HAS_NRF5_BOOTLOADER
 #define ADAFRUIT_BOOTLOADER CONFIG_BUILD_OUTPUT_UF2
 #define NRF5_BOOTLOADER CONFIG_BOARD_HAS_NRF5_BOOTLOADER
@@ -348,6 +354,9 @@ static int sys_gpio_init(void) {
 #if IS_STACKED
     gpio_pin_configure_dt(&gnd, GPIO_OUTPUT_INACTIVE);
     gpio_pin_configure_dt(&pwr, GPIO_OUTPUT_ACTIVE);
+#endif
+#if EXTRA_BTN_GND
+	gpio_pin_configure_dt(&button_gnd, GPIO_OUTPUT_INACTIVE);
 #endif
 	return 0;
 }
