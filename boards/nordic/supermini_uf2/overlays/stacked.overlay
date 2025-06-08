@@ -1,0 +1,66 @@
+// Stacked board overlay configuration for the Supermini UF2 board
+
+// The imu is stacked on top of the supermini_uf2 board
+//    Power is provided via GPIO pins (pin 17 as HIGH), (pin 20 as LOW) 
+//    CLK  is configured to be adjacent to the CLK_CTL input on the imu
+//    INT0 is configured to be adjacent to the INT0    input on the imu
+
+
+// Configure the button to use GPIO0 pin 6 for stacked configuration
+&button0 {
+    gpios = <&gpio0 6 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
+    //gpios = <&gpio0 29 (GPIO_PULL_DOWN | GPIO_ACTIVE_HIGH)>;
+};
+
+// Set the I2C pins for stacked
+&i2c0_default {
+    group1 {
+        psels = <NRF_PSEL(TWIM_SDA, 0, 24)>, <NRF_PSEL(TWIM_SCL, 0, 22)>;
+    };
+};
+&i2c0_sleep {
+    group1 {
+        psels = <NRF_PSEL(TWIM_SDA, 0, 24)>, <NRF_PSEL(TWIM_SCL, 0, 22)>;
+    };
+};
+
+// Set SPI pins for stacked
+&spi3_default {
+    group1 {
+        psels = <NRF_PSEL(SPIM_MISO, 0, 11)>, // (SDO) SD0 On module
+                <NRF_PSEL(SPIM_MOSI, 0, 24)>, // (SDI) SDA On module
+                <NRF_PSEL(SPIM_SCK, 0, 22)>;  // SCL On module (Same as i2c clock)
+    };
+};
+&spi3_sleep {
+    group1 {
+        psels = <NRF_PSEL(SPIM_MISO, 0, 11)>,
+                <NRF_PSEL(SPIM_MOSI, 0, 24)>,
+                <NRF_PSEL(SPIM_SCK, 0, 22)>;
+        low-power-enable;
+    };
+};
+&spi3 {
+	cs-gpios = <&gpio1 00 GPIO_ACTIVE_LOW>;
+};
+
+
+/ {
+    // Enable the button 
+    aliases {
+		sw0 = &button0;
+	};
+    
+	zephyr,user {
+        // vcc and ground pins for imu
+        vcc_gpios = <&gpio0 17 GPIO_OPEN_SOURCE>;
+        gnd_gpios = <&gpio0 20 GPIO_OPEN_DRAIN>;
+
+        // Interrupt adjacent to INT pin on imu (Not required, needed for Wake on Motion (WOM) aka "sleep")
+        int0-gpios = <&gpio0 2 0>;
+
+        // Clock adjacent to CLK_CTL pin on imu (comment out to disable)
+		clk-gpios = <&gpio1 11 GPIO_OPEN_DRAIN>; 
+	};
+
+};
